@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .card {
+        background: rgba(40, 40, 60, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(123, 63, 228, 0.3);
+        max-width: 600px;
+        margin: 2rem auto;
+        animation: fadeIn 0.7s ease;
+    }
+    h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #e0e0ff;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #b0b0ff;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(123, 63, 228, 0.3);
+        color: #e0e0ff;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+    .form-textarea {
+        height: 100px;
+        resize: vertical;
+    }
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #00ddeb;
+    }
+    .form-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .form-button:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+    .post-list {
+        margin-top: 2rem;
+    }
+    .post-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(123, 63, 228, 0.2);
+    }
+    .post-text {
+        color: #e0e0ff;
+        font-size: 0.9rem;
+    }
+    .post-meta {
+        color: #a3bffa;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    .like-button {
+        background: none;
+        border: none;
+        color: #00ddeb;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+    .like-button:hover {
+        color: #7b3fe4;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="card">
+    <h2>Update Profile</h2>
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="id_twitter_handle" class="form-label">Twitter Handle</label>
+            <input type="text" id="id_twitter_handle" name="twitter_handle" class="form-input" value="{{ form.twitter_handle.value|default_if_none:'' }}">
+        </div>
+        <div>
+            <label for="id_facebook_token" class="form-label">Facebook Token</label>
+            <input type="text" id="id_facebook_token" name="facebook_token" class="form-input" value="{{ form.facebook_token.value|default_if_none:'' }}">
+        </div>
+        <div>
+            <label for="id_bio" class="form-label">Bio</label>
+            <textarea id="id_bio" name="bio" class="form-textarea">{{ form.bio.value|default_if_none:'' }}</textarea>
+        </div>
+        <div>
+            <label for="id_profile_pic" class="form-label">Profile Picture</label>
+            <input type="file" id="id_profile_pic" name="profile_pic" class="form-input">
+        </div>
+        <button type="submit" class="form-button">Update Profile</button>
+    </form>
+    <div class="post-list">
+        <h2>Your Twitter Posts</h2>
+        {% if twitter_posts %}
+            {% for post in twitter_posts %}
+                <div class="post-item">
+                    <p class="post-text">{{ post.text }}</p>
+                    <p class="post-meta">Posted at {{ post.created_at }}</p>
+                    <form method="post" action="{% url 'like_post' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="platform" value="twitter">
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button type="submit" class="like-button">Like</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="post-text">No Twitter posts available.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

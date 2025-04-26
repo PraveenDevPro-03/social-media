@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .card {
+        background: rgba(40, 40, 60, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(123, 63, 228, 0.3);
+        max-width: 400px;
+        margin: 2rem auto;
+        animation: fadeIn 0.7s ease;
+        transition: transform 0.3s ease;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #e0e0ff;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-align: center;
+    }
+    p {
+        color: #b0b0ff;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+    .form-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .form-button:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+    .link {
+        color: #00ddeb;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+    .link:hover {
+        color: #7b3fe4;
+    }
+    .text-center {
+        text-align: center;
+    }
+    .mt-4 {
+        margin-top: 1rem;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="card">
+    <h2>Log Out</h2>
+    <p>Are you sure you want to log out?</p>
+    <form method="post" action="{% url 'account_logout' %}" class="space-y-4">
+        {% csrf_token %}
+        <button type="submit" class="form-button">Log Out</button>
+    </form>
+    <p class="mt-4 text-center">
+        Changed your mind? <a href="{% url 'dashboard' %}" class="link">Go back to dashboard</a>
+    </p>
+</div>
+{% endblock %}

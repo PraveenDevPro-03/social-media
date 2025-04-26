@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        padding: 2rem;
+    }
+    .post-form, .post-list {
+        background: rgba(40, 40, 60, 0.6);
+        backdrop-filter: blur(12px);
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(123, 63, 228, 0.3);
+    }
+    h2 {
+        font-size: 1.6rem;
+        font-weight: 600;
+        color: #e0e0ff;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #b0b0ff;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    .form-input, .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(123, 63, 228, 0.3);
+        color: #e0e0ff;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+    .form-textarea {
+        height: 100px;
+        resize: vertical;
+    }
+    .form-input:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #00ddeb;
+    }
+    .form-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(45deg, #7b3fe4, #00ddeb);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .form-button:hover {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+    .post-item {
+        background: rgba(255, 255, 255, 0.05);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(123, 63, 228, 0.2);
+    }
+    .post-text {
+        color: #e0e0ff;
+        font-size: 0.9rem;
+    }
+    .post-meta {
+        color: #a3bffa;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+    }
+    .like-button {
+        background: none;
+        border: none;
+        color: #00ddeb;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: color 0.3s ease;
+    }
+    .like-button:hover {
+        color: #7b3fe4;
+    }
+    @media (max-width: 768px) {
+        .dashboard {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="dashboard">
+    <div class="post-form">
+        <h2>Create a Post</h2>
+        <form method="post" action="{% url 'dashboard' %}" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="platform" class="form-label">Platform</label>
+                <select id="platform" name="platform" class="form-input" required>
+                    <option value="twitter">Twitter</option>
+                    <option value="facebook">Facebook</option>
+                </select>
+            </div>
+            <div>
+                <label for="post_text" class="form-label">Post Content</label>
+                <textarea id="post_text" name="post_text" class="form-textarea" required></textarea>
+            </div>
+            <div>
+                <label for="schedule_time" class="form-label">Schedule Time (Optional)</label>
+                <input type="datetime-local" id="schedule_time" name="schedule_time" class="form-input">
+            </div>
+            <button type="submit" class="form-button">Post</button>
+        </form>
+    </div>
+    <div class="post-list">
+        <h2>Your Posts</h2>
+        {% if twitter_posts %}
+            {% for post in twitter_posts %}
+                <div class="post-item">
+                    <p class="post-text">{{ post.text }}</p>
+                    <p class="post-meta">Posted on Twitter at {{ post.created_at }}</p>
+                    <form method="post" action="{% url 'like_post' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="platform" value="twitter">
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button type="submit" class="like-button">Like</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="post-text">No Twitter posts available.</p>
+        {% endif %}
+        {% if facebook_posts %}
+            {% for post in facebook_posts %}
+                <div class="post-item">
+                    <p class="post-text">{{ post.message|default:"No message" }}</p>
+                    <p class="post-meta">Posted on Facebook at {{ post.created_time }}</p>
+                    <form method="post" action="{% url 'like_post' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="platform" value="facebook">
+                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                        <button type="submit" class="like-button">Like</button>
+                    </form>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="post-text">No Facebook posts available.</p>
+        {% endif %}
+        {% if scheduled_posts %}
+            <h2>Scheduled Posts</h2>
+            {% for post in scheduled_posts %}
+                <div class="post-item">
+                    <p class="post-text">{{ post.text }}</p>
+                    <p class="post-meta">Scheduled for {{ post.scheduled_time }} on {{ post.platform }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="post-text">No scheduled posts.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
